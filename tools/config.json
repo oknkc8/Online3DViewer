@@ -45,6 +45,7 @@
 		"source/import/importergltf.js",
 		"source/import/importero3dv.js",
 		"source/import/importerthree.js",
+		"source/import/importerassimp.js",
 		"source/import/importer3dm.js",
 		"source/import/importerifc.js",
 		"source/import/filelist.js",

@@ -88,7 +88,8 @@ OV.Importer = class
             new OV.ImporterO3dv (),
             new OV.Importer3dm (),
             new OV.ImporterIfc (),
-            new OV.ImporterThree ()
+            new OV.ImporterThree (),
+            new OV.ImporterAssimp ()
         ];
         this.fileList = new OV.FileList ();
         this.model = null;
@@ -150,6 +151,18 @@ OV.Importer = class
             },
             getTextureBuffer : (filePath) => {
                 return buffers.GetTextureBuffer (filePath);
+            },
+            getAllBuffers : () => {
+                const files = this.fileList.GetFiles ();
+                let buffers = [];
+                for (let i = 0; i < files.length; i++) {
+                    let file = files[i];
+                    buffers.push ({
+                        name : file.name,
+                        content : file.content
+                    });
+                }
+                return buffers;
             },
             onSuccess : () => {
                 this.model = importer.GetModel ();
