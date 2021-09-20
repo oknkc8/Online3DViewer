@@ -35,6 +35,7 @@
 			"fflate": "readonly",
 			"Pickr": "readonly",
 			"THREE": "readonly",
+			"assimpjs": "readonly",
 			"DracoDecoderModule": "readonly",
 			"rhino3dm": "readonly",
 			"IfcAPI": "readonly"
