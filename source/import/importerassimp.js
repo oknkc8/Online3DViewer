@@ -133,6 +133,10 @@ OV.ImporterAssimp = class extends OV.ImporterBase
             }
 
             let mesh = new OV.Mesh ();
+            if (jsonMesh.name !== undefined) {
+                mesh.SetName (jsonMesh.name);
+            }
+
             for (let i = 0; i < jsonMesh.vertices.length; i += 3) {
                 let vertex = new OV.Coord3D (
                     jsonMesh.vertices[i],
