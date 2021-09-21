@@ -8,7 +8,7 @@ OV.ImporterAssimp = class extends OV.ImporterBase
 	
     CanImportExtension (extension)
     {
-        const extensions = ['blend'];
+        const extensions = ['blend', 'nff'];
         return extensions.indexOf (extension) !== -1;
     }
 
@@ -63,14 +63,24 @@ OV.ImporterAssimp = class extends OV.ImporterBase
 
     ImportAssimpJson (assimpJson)
     {
-        function EnumerateNode (node, processor)
+        function EnumerateNode (node, matrix, processor)
         {
-            processor (node);
+            let nodeMatrix = matrix;
+            if (node.transformation !== undefined) {
+                let nodeTransformationMatrix = new OV.Matrix ([
+                    node.transformation[0], node.transformation[4], node.transformation[8], node.transformation[12],
+                    node.transformation[1], node.transformation[5], node.transformation[9], node.transformation[13],
+                    node.transformation[2], node.transformation[6], node.transformation[10], node.transformation[14],
+                    node.transformation[3], node.transformation[7], node.transformation[11], node.transformation[15]
+                ]);
+                nodeMatrix = nodeTransformationMatrix.MultiplyMatrix (nodeMatrix);
+            }
+            processor (node, nodeMatrix);
             if (node.children === undefined) {
                 return;
             }
             for (const child of node.children) {
-                EnumerateNode (child, processor);
+                EnumerateNode (child, nodeMatrix, processor);
             }
         }
 
@@ -81,12 +91,12 @@ OV.ImporterAssimp = class extends OV.ImporterBase
             return;
         }
 
-        EnumerateNode (rootNode, (node) => {
+        let baseMatrix = new OV.Matrix ().CreateIdentity ();
+        EnumerateNode (rootNode, baseMatrix, (node, matrix) => {
             if (node.meshes === undefined) {
                 return;
             }
-            // TODO: transformation
-            this.ImportJsonMeshes (assimpJson, node.meshes);
+            this.ImportJsonMeshes (assimpJson, node.meshes, matrix);
         });
     }
 
@@ -118,13 +128,18 @@ OV.ImporterAssimp = class extends OV.ImporterBase
                     material.ambient = JsonColorToColor (jsonProperty.value);
                 } else if (jsonProperty.key === '$clr.specular') {
                     material.specular = JsonColorToColor (jsonProperty.value);
+                } else if (jsonProperty.key === '$clr.emissive') {
+                    material.emissive = JsonColorToColor (jsonProperty.value);
+                } else if (jsonProperty.key === '$mat.opacity') {
+                    material.opacity = jsonProperty.value;
+                    OV.UpdateMaterialTransparency (material);    
                 }
             }
             this.model.AddMaterial (material);
         }
     }
 
-    ImportJsonMeshes (assimpJson, meshIndices)
+    ImportJsonMeshes (assimpJson, meshIndices, matrix)
     {
         for (const meshIndex of meshIndices) {
             let jsonMesh = assimpJson.meshes[meshIndex];
@@ -138,12 +153,25 @@ OV.ImporterAssimp = class extends OV.ImporterBase
             }
 
             for (let i = 0; i < jsonMesh.vertices.length; i += 3) {
-                let vertex = new OV.Coord3D (
+                const vertex = new OV.Coord3D (
                     jsonMesh.vertices[i],
                     jsonMesh.vertices[i + 1],
                     jsonMesh.vertices[i + 2]
                 );
                 mesh.AddVertex (vertex);
+            }
+
+            let hasNormals = false;
+            if (jsonMesh.normals !== undefined) {
+                hasNormals = true;
+                for (let i = 0; i < jsonMesh.normals.length; i += 3) {
+                    const normal = new OV.Coord3D (
+                        jsonMesh.normals[i],
+                        jsonMesh.normals[i + 1],
+                        jsonMesh.normals[i + 2]
+                    );
+                    mesh.AddNormal (normal);
+                }                
             }
 
             let materialIndex = null;
@@ -156,12 +184,22 @@ OV.ImporterAssimp = class extends OV.ImporterBase
                 let triangle = new OV.Triangle (
                     jsonFace[0],
                     jsonFace[1],
-                    jsonFace[2]                    
+                    jsonFace[2]
                 );
+                if (hasNormals) {
+                    triangle.SetNormals (
+                        jsonFace[0],
+                        jsonFace[1],
+                        jsonFace[2]
+                    );
+                }
                 triangle.SetMaterial (materialIndex);
                 mesh.AddTriangle (triangle);
             }
-            
+
+            let transformation = new OV.Transformation (matrix);
+            OV.TransformMesh (mesh, transformation);
+
             this.model.AddMesh (mesh);
         }
     }
