@@ -32,27 +32,32 @@ OV.ImporterAssimp = class extends OV.ImporterBase
 			OV.LoadExternalLibrary ('loaders/assimpjs.js').then (() => {
 				assimpjs ().then ((assimpjs) => {
 					this.assimpjs = assimpjs;
-					this.ImportAssimpContent ();
+					this.ImportAssimpContent (fileContent);
 					onFinish ();
 				});
             }).catch (() => {
                 onFinish ();
             });
 		} else {
-			this.ImportAssimpContent ();
+			this.ImportAssimpContent (fileContent);
 			onFinish ();
 		}
     }
 
-	ImportAssimpContent ()
+	ImportAssimpContent (fileContent)
 	{
-		const fileBuffers = this.callbacks.getAllBuffers ();
-        let fileList = new this.assimpjs.FileList ();
-        for (const fileBuffer of fileBuffers) {
-            fileList.AddFile (fileBuffer.name, new Uint8Array (fileBuffer.content));
-        }
-
-        let assimpJsonText = this.assimpjs.ImportModel (fileList);
+        let fileBuffer = new Uint8Array (fileContent);
+        let assimpJsonText = this.assimpjs.ImportFile (
+            this.name,
+            fileBuffer,
+            (fileName) => {
+                return this.callbacks.getFileBuffer (fileName) !== null;
+            },
+            (fileName) => {
+                let buffer = this.callbacks.getFileBuffer (fileName);
+                return new Uint8Array (buffer);
+            }
+        );
         let assimpJson = JSON.parse (assimpJsonText);
         if (assimpJson.error !== undefined) {
             return;

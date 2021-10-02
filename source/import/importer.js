@@ -152,18 +152,6 @@ OV.Importer = class
             getTextureBuffer : (filePath) => {
                 return buffers.GetTextureBuffer (filePath);
             },
-            getAllBuffers : () => {
-                const files = this.fileList.GetFiles ();
-                let buffers = [];
-                for (let i = 0; i < files.length; i++) {
-                    let file = files[i];
-                    buffers.push ({
-                        name : file.name,
-                        content : file.content
-                    });
-                }
-                return buffers;
-            },
             onSuccess : () => {
                 let result = new OV.ImportResult ();
                 result.mainFile = mainFile.file.name;
