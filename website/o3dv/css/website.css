@@ -138,9 +138,13 @@ div.ov_toolbar
 
 div.ov_toolbar div.ov_toolbar_button
 {
-	padding: 10px;
 	float: left;
 	cursor: pointer;
+}
+
+div.ov_toolbar div.ov_toolbar_button div.ov_svg_icon
+{
+	padding: 10px;
 }
 
 div.ov_toolbar div.ov_toolbar_button.right
@@ -258,7 +262,6 @@ div.ov_sidebar_content div.ov_sidebar_settings_row
 
 div.ov_sidebar_content div.ov_sidebar_settings_padded
 {
-	color: var(--ov_light_icon_color);
 	margin: 10px 0px 0px 40px;
 	float: left;
 }
