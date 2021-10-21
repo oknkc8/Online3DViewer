@@ -8,7 +8,34 @@ OV.ImporterAssimp = class extends OV.ImporterBase
 	
     CanImportExtension (extension)
     {
-        const extensions = ['blend', 'nff'];
+        const extensions = [
+            '3d',
+            'ac',
+            'amf',
+            'ase',
+            'b3d',
+            'blend',
+            'bvh',
+            'cob',
+            'csm',
+            'dxf',
+            'hmp',
+            'lwo',
+            'lxo',
+            'lws',
+            'md2',
+            'md5mesh',
+            'mdc',
+            'ms3d',
+            'nff',
+            'ogex',
+            'q3o',
+            'sib',
+            'smd',
+            'x',
+            'zgl',
+            'xgl'
+        ];
         return extensions.indexOf (extension) !== -1;
     }
 
@@ -47,9 +74,8 @@ OV.ImporterAssimp = class extends OV.ImporterBase
 	ImportAssimpContent (fileContent)
 	{
         let fileBuffer = new Uint8Array (fileContent);
-        let assimpJsonText = this.assimpjs.ImportFile (
-            this.name,
-            fileBuffer,
+        let result = this.assimpjs.ConvertFile (
+            this.name, 'assjson', fileBuffer,
             (fileName) => {
                 return this.callbacks.getFileBuffer (fileName) !== null;
             },
@@ -58,6 +84,13 @@ OV.ImporterAssimp = class extends OV.ImporterBase
                 return new Uint8Array (buffer);
             }
         );
+        if (!result.IsSuccess () || result.FileCount () < 1) {
+            return;
+        }
+
+        let resultFile = result.GetFile (0);
+        let assimpJsonText = OV.ArrayBufferToUtf8String (resultFile.GetContent ());
+
         let assimpJson = JSON.parse (assimpJsonText);
         if (assimpJson.error !== undefined) {
             return;
@@ -107,6 +140,21 @@ OV.ImporterAssimp = class extends OV.ImporterBase
 
     ImportJsonMaterials (assimpJson)
     {
+        function GetTextureFromFile (texFileName, callbacks)
+        {
+            let textureBuffer = callbacks.getTextureBuffer (texFileName);
+            if (textureBuffer === null) {
+                return null;
+            }
+            let texture = new OV.TextureMap ();
+            texture.name = texFileName;
+            if (textureBuffer !== null) {
+                texture.url = textureBuffer.url;
+                texture.buffer = textureBuffer.buffer;
+            }
+            return texture;
+        }
+
         function JsonColorToColor (jsonColor)
         {
             return new OV.Color (
@@ -123,7 +171,6 @@ OV.ImporterAssimp = class extends OV.ImporterBase
         for (const jsonMaterial of assimpJson.materials) {
             let material = new OV.Material (OV.MaterialType.Phong);
             // TODO: other properties
-            // TODO: textures
             for (const jsonProperty of jsonMaterial.properties) {
                 if (jsonProperty.key === '?mat.name') {
                     material.name = jsonProperty.value;
@@ -133,11 +180,12 @@ OV.ImporterAssimp = class extends OV.ImporterBase
                     material.ambient = JsonColorToColor (jsonProperty.value);
                 } else if (jsonProperty.key === '$clr.specular') {
                     material.specular = JsonColorToColor (jsonProperty.value);
-                } else if (jsonProperty.key === '$clr.emissive') {
-                    material.emissive = JsonColorToColor (jsonProperty.value);
                 } else if (jsonProperty.key === '$mat.opacity') {
                     material.opacity = jsonProperty.value;
                     OV.UpdateMaterialTransparency (material);    
+                } else if (jsonProperty.key === '$tex.file') {
+                    // TODO: other texture parameters
+                    material.diffuseMap = GetTextureFromFile (jsonProperty.value, this.callbacks);
                 }
             }
             this.model.AddMaterial (material);
@@ -179,6 +227,19 @@ OV.ImporterAssimp = class extends OV.ImporterBase
                 }                
             }
 
+            let hasUVs = false;
+            if (jsonMesh.texturecoords !== undefined && jsonMesh.texturecoords.length > 0) {
+                hasUVs = true;
+                let textureCoords = jsonMesh.texturecoords[0];
+                for (let i = 0; i < textureCoords.length; i += 2) {
+                    const uv = new OV.Coord2D (
+                        textureCoords[i],
+                        textureCoords[i + 1]
+                    );
+                    mesh.AddTextureUV (uv);
+                }                
+            }            
+
             let materialIndex = null;
             if (jsonMesh.materialindex !== undefined) {
                 materialIndex = jsonMesh.materialindex;
@@ -193,6 +254,13 @@ OV.ImporterAssimp = class extends OV.ImporterBase
                 );
                 if (hasNormals) {
                     triangle.SetNormals (
+                        jsonFace[0],
+                        jsonFace[1],
+                        jsonFace[2]
+                    );
+                }
+                if (hasUVs) {
+                    triangle.SetTextureUVs (
                         jsonFace[0],
                         jsonFace[1],
                         jsonFace[2]
