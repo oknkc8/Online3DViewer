@@ -382,13 +382,13 @@ OV.Website = class
         AddButton (this.toolbar, this.eventHandler, 'open', 'Open model from your device', null, () => {
             this.OpenFileBrowserDialog ();
         });
-        AddButton (this.toolbar, this.eventHandler, 'open_url', 'Open model from a url', null, () => {
-            this.dialog = OV.ShowOpenUrlDialog ((urls) => {
-                if (urls.length > 0) {
-                    this.hashHandler.SetModelFilesToHash (urls);
-                }
-            });
-        });
+        // AddButton (this.toolbar, this.eventHandler, 'open_url', 'Open model from a url', null, () => {
+        //     this.dialog = OV.ShowOpenUrlDialog ((urls) => {
+        //         if (urls.length > 0) {
+        //             this.hashHandler.SetModelFilesToHash (urls);
+        //         }
+        //     });
+        // });
         AddSeparator (this.toolbar, 'only_on_model');
         AddButton (this.toolbar, this.eventHandler, 'fit', 'Fit model to window', 'only_on_model', () => {
             this.FitModelToWindow (false);
@@ -396,32 +396,34 @@ OV.Website = class
         AddButton (this.toolbar, this.eventHandler, 'up_y', 'Set Y axis as up vector', 'only_on_model', () => {
             this.viewer.SetUpVector (OV.Direction.Y, true);
         });
-        AddButton (this.toolbar, this.eventHandler, 'up_z', 'Set Z axis as up vector', 'only_on_model', () => {
-            this.viewer.SetUpVector (OV.Direction.Z, true);
-        });
+        // AddButton (this.toolbar, this.eventHandler, 'up_z', 'Set Z axis as up vector', 'only_on_model', () => {
+        //     this.viewer.SetUpVector (OV.Direction.Z, true);
+        // });
         AddButton (this.toolbar, this.eventHandler, 'flip', 'Flip up vector', 'only_on_model', () => {
             this.viewer.FlipUpVector ();
         });
-        AddSeparator (this.toolbar, 'only_on_model');
-        AddRadioButton (this.toolbar, this.eventHandler, ['fix_up_on', 'fix_up_off'], ['Fixed up vector', 'Free orbit'], 0, 'only_on_model', (buttonIndex) => {
-            if (buttonIndex === 0) {
-                this.viewer.SetFixUpVector (true);
-            } else if (buttonIndex === 1) {
-                this.viewer.SetFixUpVector (false);
-            }
-        });
-        AddSeparator (this.toolbar, 'only_full_width only_on_model');
-        AddButton (this.toolbar, this.eventHandler, 'export', 'Export model', 'only_full_width only_on_model', () => {
-            let exportDialog = new OV.ExportDialog ({
-                onDialog : (dialog) => {
-                    this.dialog = dialog;
-                }
-            });
-            exportDialog.Show (this.model, this.viewer);
-        });
-        AddButton (this.toolbar, this.eventHandler, 'share', 'Share model', 'only_full_width only_on_model', () => {
-            this.dialog = OV.ShowSharingDialog (importer, this.settings, this.viewer.GetCamera ());
-        });
+        this.viewer.SetFixUpVector (false);
+        // AddSeparator (this.toolbar, 'only_on_model');
+        // AddRadioButton (this.toolbar, this.eventHandler, ['fix_up_off'], ['Free Orbit'], 0, 'only_on_model', (buttonIndex) => {
+        //     this.viewer.SetFixUpVector (false);
+        //     if (buttonIndex === 0) {
+        //         this.viewer.SetFixUpVector (false);
+        //     } else if (buttonIndex === 1) {
+        //         this.viewer.SetFixUpVector (false);
+        //     }
+        // });
+        // AddSeparator (this.toolbar, 'only_full_width only_on_model');
+        // AddButton (this.toolbar, this.eventHandler, 'export', 'Export model', 'only_full_width only_on_model', () => {
+        //     let exportDialog = new OV.ExportDialog ({
+        //         onDialog : (dialog) => {
+        //             this.dialog = dialog;
+        //         }
+        //     });
+        //     exportDialog.Show (this.model, this.viewer);
+        // });
+        // AddButton (this.toolbar, this.eventHandler, 'share', 'Share model', 'only_full_width only_on_model', () => {
+        //     this.dialog = OV.ShowSharingDialog (importer, this.settings, this.viewer.GetCamera ());
+        // });
 
         this.parameters.fileInput.on ('change', (ev) => {
             if (ev.target.files.length > 0) {
@@ -697,7 +699,7 @@ OV.Website = class
 
     InitCookieConsent ()
     {
-        let accepted = this.cookieHandler.GetBoolVal ('ov_cookie_consent', false);
+        let accepted = this.cookieHandler.GetBoolVal ('ov_cookie_consent', true);
         if (accepted) {
             return;
         }

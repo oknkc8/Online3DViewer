@@ -171,20 +171,20 @@ OV.Navigator = class
             }
         }
 
-        let materialsItem = new OV.TreeViewGroupItem ('Materials', 'materials');
-        this.treeView.AddItem (materialsItem);
-        for (let i = 0; i < model.MaterialCount (); i++) {
-            let material = model.GetMaterial (i);
-            let materialName = OV.GetMaterialName (material.name);
-            let materialData = new OV.MaterialData (i);
-            let materialItem = materialData.CreateMenuItem (materialName, {
-                onSelected : (materialIndex) => {
-                    this.SetSelection (new OV.Selection (OV.SelectionType.Material, materialIndex));
-                }
-            });
-            this.modelData.AddMaterialData (materialData);
-            materialsItem.AddChild (materialItem);
-        }
+        // let materialsItem = new OV.TreeViewGroupItem ('Materials', 'materials');
+        // this.treeView.AddItem (materialsItem);
+        // for (let i = 0; i < model.MaterialCount (); i++) {
+        //     let material = model.GetMaterial (i);
+        //     let materialName = OV.GetMaterialName (material.name);
+        //     let materialData = new OV.MaterialData (i);
+        //     let materialItem = materialData.CreateMenuItem (materialName, {
+        //         onSelected : (materialIndex) => {
+        //             this.SetSelection (new OV.Selection (OV.SelectionType.Material, materialIndex));
+        //         }
+        //     });
+        //     this.modelData.AddMaterialData (materialData);
+        //     materialsItem.AddChild (materialItem);
+        // }
 
         let meshesItem = new OV.TreeViewGroupItem ('Meshes', 'meshes');
         this.treeView.AddItem (meshesItem);

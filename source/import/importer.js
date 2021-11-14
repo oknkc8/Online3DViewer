@@ -113,6 +113,10 @@ OV.Importer = class
 
     Import (settings, callbacks)
     {
+        for (let i = 0; i <this.fileList.length; i++) {
+            
+        }
+
         let mainFile = this.GetMainFile (this.fileList);
         if (mainFile === null || mainFile.file === null || mainFile.file.content === null) {
             callbacks.onError (new OV.ImportError (OV.ImportErrorCode.NoImportableFile, null));

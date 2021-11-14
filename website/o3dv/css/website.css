@@ -187,6 +187,7 @@ div.ov_navigator_info_panel
 {
 	overflow: auto;
 	border-top: 1px solid var(--ov_border_color);
+	display: none;
 }
 
 div.ov_navigator_info_panel div.ov_navigator_info_button

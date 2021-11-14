@@ -2,19 +2,19 @@ OV.GetDefaultCamera = function (direction)
 {
     if (direction === OV.Direction.X) {
         return new OV.Camera (
-            new OV.Coord3D (2.0, -3.0, 1.5),
+            new OV.Coord3D (-2.0, -3.0, -1.5),
             new OV.Coord3D (0.0, 0.0, 0.0),
             new OV.Coord3D (1.0, 0.0, 0.0)
         );    
     } else if (direction === OV.Direction.Y) {
         return new OV.Camera (
-            new OV.Coord3D (-1.5, 2.0, 3.0),
+            new OV.Coord3D (1.5, -2.0, -3.0),
             new OV.Coord3D (0.0, 0.0, 0.0),
-            new OV.Coord3D (0.0, 1.0, 0.0)
+            new OV.Coord3D (0.0, -1.0, 0.0)
         );    
     } else if (direction === OV.Direction.Z) {
         return new OV.Camera (
-            new OV.Coord3D (-1.5, -3.0, 2.0),
+            new OV.Coord3D (1.5, -3.0, -2.0),
             new OV.Coord3D (0.0, 0.0, 0.0),
             new OV.Coord3D (0.0, 0.0, 1.0)
         );
@@ -44,13 +44,16 @@ OV.UpVector = class
 
         let newCamera = oldCamera.Clone ();
         if (this.direction === OV.Direction.X) {
-            newCamera.up = new OV.Coord3D (1.0, 0.0, 0.0);
+            // newCamera.up = new OV.Coord3D (1.0, 0.0, 0.0);
+            newCamera.up = new OV.Coord3D (0.0, 0.0, 1.0);
             newCamera.eye = newEye;
         } if (this.direction === OV.Direction.Y) {
-            newCamera.up = new OV.Coord3D (0.0, 1.0, 0.0);
+            // newCamera.up = new OV.Coord3D (0.0, 1.0, 0.0);
+            newCamera.up = new OV.Coord3D (0.0, -1.0, 0.0);
             newCamera.eye = newEye;
         } else if (this.direction === OV.Direction.Z) {
-            newCamera.up = new OV.Coord3D (0.0, 0.0, 1.0);
+            // newCamera.up = new OV.Coord3D (0.0, 0.0, 1.0);
+            newCamera.up = new OV.Coord3D (1.0, 0.0, 0.0);
             newCamera.eye = newEye;
         }
         return newCamera;
